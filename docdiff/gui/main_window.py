@@ -174,8 +174,14 @@ class DocDiffWindow(QMainWindow):
         out_input_layout.addWidget(self.output_input, 1)
         out_input_layout.addWidget(self.output_browse_btn)
 
+        # Overwrite original checkbox
+        self.overwrite_cb = QCheckBox("直接覆盖修订版（不另存为，无需指定输出路径）")
+        self.overwrite_cb.setObjectName("OverwriteCheck")
+        self.overwrite_cb.stateChanged.connect(self._on_overwrite_toggled)
+
         output_layout.addLayout(out_header_row)
         output_layout.addLayout(out_input_layout)
+        output_layout.addWidget(self.overwrite_cb)
 
         main_layout.addWidget(output_frame)
 
@@ -219,6 +225,8 @@ class DocDiffWindow(QMainWindow):
                         self.output_input.setText(data["output_path"])
                     if "show_deletions" in data:
                         self.show_deletions_cb.setChecked(bool(data["show_deletions"]))
+                    if "overwrite" in data:
+                        self.overwrite_cb.setChecked(bool(data["overwrite"]))
             except Exception:
                 pass
 
@@ -228,7 +236,8 @@ class DocDiffWindow(QMainWindow):
                 "old_path": self.old_card.get_path(),
                 "new_path": self.new_card.get_path(),
                 "output_path": self.output_input.text().strip(),
-                "show_deletions": self.show_deletions_cb.isChecked()
+                "show_deletions": self.show_deletions_cb.isChecked(),
+                "overwrite": self.overwrite_cb.isChecked()
             }
             with open(CONFIG_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
@@ -251,7 +260,17 @@ class DocDiffWindow(QMainWindow):
                 file_path += '.docx'
             self.output_input.setText(file_path)
 
+    def _on_overwrite_toggled(self, checked: int):
+        overwrite = bool(checked)
+        # When overwriting the revised version, output path no longer needs to be specified
+        self.output_input.setEnabled(not overwrite)
+        self.output_browse_btn.setEnabled(not overwrite)
+        self.status_label.setText("将直接覆盖修订版（新文件）" if overwrite else "准备就绪")
+
     def _get_target_output_path(self, new_path: str) -> str:
+        if self.overwrite_cb.isChecked():
+            # Overwrite the revise version (new file) directly
+            return new_path
         custom_out = self.output_input.text().strip()
         if custom_out:
             return custom_out

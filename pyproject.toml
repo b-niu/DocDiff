@@ -1,0 +1,19 @@
+[project]
+name = "docdiff"
+version = "0.1.0"
+description = "DocDiff - 文档差异标红与对比工具"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyside6>=6.5.0",
+    "python-docx>=0.8.11",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[[tool.uv.index]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true

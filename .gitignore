@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# DocDiff local user configuration
+config.json
+.config.json
+*.tracked.docx
+
